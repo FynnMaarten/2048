@@ -1,0 +1,155 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/cl2048"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/bg2048"
+    tools:context=".Game2048" >
+
+    <ImageView
+        android:id="@+id/grid"
+        android:layout_width="@dimen/_271sdp"
+        android:layout_height="@dimen/_274sdp"
+        android:layout_marginStart="@dimen/_6sdp"
+        android:layout_marginTop="@dimen/_150sdp"
+        android:layout_marginEnd="@dimen/_6sdp"
+        android:layout_marginBottom="@dimen/_6sdp"
+        android:background="@drawable/grid"
+        android:visibility="visible"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.008" />
+
+    <TextView
+        android:id="@+id/logo2048"
+        android:layout_width="@dimen/_94sdp"
+        android:layout_height="@dimen/_46sdp"
+        android:layout_marginStart="@dimen/_6sdp"
+        android:layout_marginTop="@dimen/_60sdp"
+        android:layout_marginEnd="@dimen/_6sdp"
+        android:fontFamily="sans-serif"
+        android:text="2048"
+        android:textAppearance="@style/TextAppearance.AppCompat.Button"
+        android:textColor="#776E65"
+        android:textSize="50sp"
+        android:visibility="visible"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.082"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <ImageView
+        android:id="@+id/highscoreimg2048"
+        android:layout_width="@dimen/_48sdp"
+        android:layout_height="@dimen/_40sdp"
+        android:layout_marginTop="@dimen/_78sdp"
+        android:layout_marginEnd="@dimen/_36sdp"
+        android:background="@drawable/record2048"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <TextView
+        android:id="@+id/highscore2048"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:fontFamily="sans-serif"
+        android:text="0"
+        android:textAppearance="@style/TextAppearance.AppCompat.Button"
+        android:textColor="#F4EFEB"
+        android:textSize="18sp"
+        app:layout_constraintBottom_toBottomOf="@+id/highscoreimg2048"
+        app:layout_constraintEnd_toEndOf="@+id/highscoreimg2048"
+        app:layout_constraintStart_toStartOf="@+id/highscoreimg2048"
+        app:layout_constraintTop_toTopOf="@+id/highscoreimg2048"
+        app:layout_constraintVertical_bias="0.7" />
+
+    <ImageView
+        android:id="@+id/scoreimg2048"
+        android:layout_width="@dimen/_64sdp"
+        android:layout_height="@dimen/_40sdp"
+        android:layout_marginStart="@dimen/_6sdp"
+        android:layout_marginTop="@dimen/_78sdp"
+        android:layout_marginEnd="@dimen/_6sdp"
+        android:background="@drawable/scoreimg"
+        app:layout_constraintEnd_toStartOf="@+id/highscoreimg2048"
+        app:layout_constraintHorizontal_bias="1.0"
+        app:layout_constraintStart_toEndOf="@+id/logo2048"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <TextView
+        android:id="@+id/score2048"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:fontFamily="sans-serif"
+        android:text="0"
+        android:textAlignment="center"
+        android:textAppearance="@style/TextAppearance.AppCompat.Button"
+        android:textColor="#F4EFEB"
+        android:textSize="18sp"
+        app:layout_constraintBottom_toBottomOf="@+id/scoreimg2048"
+        app:layout_constraintEnd_toEndOf="@+id/scoreimg2048"
+        app:layout_constraintStart_toStartOf="@+id/scoreimg2048"
+        app:layout_constraintTop_toTopOf="@+id/scoreimg2048"
+        app:layout_constraintVertical_bias="0.739" />
+
+    <ImageView
+        android:id="@+id/filter2048"
+        android:layout_width="@dimen/_271sdp"
+        android:layout_height="@dimen/_274sdp"
+        android:background="@drawable/filter"
+        android:elevation="2dp"
+        android:visibility="invisible"
+        app:layout_constraintBottom_toBottomOf="@+id/grid"
+        app:layout_constraintEnd_toEndOf="@+id/grid"
+        app:layout_constraintStart_toStartOf="@+id/grid"
+        app:layout_constraintTop_toTopOf="@+id/grid" />
+
+    <TextView
+        android:id="@+id/gamestate2048"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="@dimen/_minus16sdp"
+        android:elevation="4dp"
+        android:textAlignment="center"
+        android:textAppearance="@style/TextAppearance.AppCompat"
+        android:textColor="#776E65"
+        android:textSize="38sp"
+        app:layout_constraintBottom_toBottomOf="@+id/filter2048"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="@+id/filter2048" />
+
+    <TextView
+        android:id="@+id/continue2048"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="@dimen/_6sdp"
+        android:layout_marginTop="@dimen/_3sdp"
+        android:elevation="4dp"
+        android:fontFamily="sans-serif"
+        android:text="Tippe um fortzufahren!"
+        android:textAlignment="center"
+        android:textSize="18sp"
+        android:visibility="invisible"
+        app:layout_constraintEnd_toEndOf="@+id/filter2048"
+        app:layout_constraintHorizontal_bias="0.467"
+        app:layout_constraintStart_toStartOf="@+id/filter2048"
+        app:layout_constraintTop_toBottomOf="@+id/gamestate2048" />
+
+    <View
+        android:id="@+id/view19"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:background="#000000"
+        android:visibility="invisible"
+        android:elevation="4dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+</android.support.constraint.ConstraintLayout>
