@@ -4,18 +4,23 @@ import android.content.Context;
 import android.graphics.Point;
 import android.graphics.PointF;
 import android.support.constraint.ConstraintLayout;
+import android.widget.TextView;
 
 import java.util.Random;
 
-public class Tile extends android.support.v7.widget.AppCompatImageView {
+public class Tile extends android.support.v7.widget.AppCompatTextView {
 
     Random r = new Random();
 
     int number;
     Point spot = null;
 
+    Context context;
+
     public Tile(Context context, float posX, float posY, int width, int height) {
         super(context);
+
+        this.context = context;
 
         number = r.nextBoolean() ? 2 : 4;
 
@@ -30,49 +35,39 @@ public class Tile extends android.support.v7.widget.AppCompatImageView {
 
 
     //Sets the color (and number) of the tile
-    public void setColor(int number){
-        if(number < 2048){
-            int i = 0;
-            while(number / Math.pow(2,i) != 2){
-                i += 1;
-            }
-
-            int resourceId = this.getResources().getIdentifier("block" + (i + 1),"drawable",getContext().getPackageName());
-            this.setImageResource(resourceId);
-        }else{
-            //Sets tile color to 2048
-            this.setImageResource(R.drawable.block11);
-        }
+    public void setColor(int number) {
+        int resourceId = this.getResources().getIdentifier("tile_" + number, "drawable", getContext().getPackageName());
+        this.setBackground(context.getDrawable(resourceId));
     }
 
 
-    public void setPostion(float x,float y){
-        setPosition(new PointF(x,y));
+    public void setPostion(float x, float y) {
+        setPosition(new PointF(x, y));
     }
 
-    public void setPosition(PointF pos){
+    public void setPosition(PointF pos) {
         this.setX(pos.x);
         this.setY(pos.y);
     }
 
-    public void setSpot(Point p){
+    public void setSpot(Point p) {
         spot = p;
     }
 
-    public Point getSpot(){
-       return spot;
+    public Point getSpot() {
+        return spot;
     }
 
-    public int getNumber(){
+    public int getNumber() {
         return number;
     }
 
-    public void setNumber(int number){
+    public void setNumber(int number) {
         this.number = number;
     }
 
 
-    public int randomNumber(int min, int max){
+    public int randomNumber(int min, int max) {
         int range = (max - min) + 1;
         return ((int) (Math.random() * range) + min);
     }

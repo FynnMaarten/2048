@@ -1,19 +1,27 @@
 package io.fynn.g2048;
 
+import android.animation.Animator;
+import android.animation.AnimatorSet;
+import android.animation.ObjectAnimator;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Point;
 import android.graphics.PointF;
+import android.os.Handler;
 import android.preference.PreferenceManager;
 import android.support.constraint.ConstraintLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
+import android.view.animation.Animation;
+import android.view.animation.TranslateAnimation;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import java.util.ArrayList;
+import java.util.Timer;
+import java.util.TimerTask;
 
 import io.fynn.g2048.enums.RotationDirection;
 import io.fynn.g2048.enums.SwipeDirection;
@@ -35,6 +43,7 @@ public class Game2048 extends AppCompatActivity {
     //variables
     public static boolean moved = false;
     public static boolean fingerliftoff = true;
+    public static boolean animfinished = false;
     public static int score = 0;
     public static int highscore = 0;
     Point optionbefore;
@@ -42,8 +51,11 @@ public class Game2048 extends AppCompatActivity {
     //Other important classes
     GameFunctions gameFunctions = new GameFunctions();
 
+    //Native classes
     SharedPreferences sp;
     SharedPreferences.Editor ed;
+    Timer timer = new Timer();
+    Handler handler = new Handler();
 
 
     @Override
@@ -66,8 +78,9 @@ public class Game2048 extends AppCompatActivity {
 
         int var = sp.getInt("highscore", 0);
         highscore = (var > 0) ? var : 0;
+        highscoretext.setText(highscore + "");
 
-        grid = findViewById(R.id.grid);
+        grid = findViewById(R.id.grid_frame);
         grid.post(new Runnable() {
             @Override
             public void run() {
@@ -95,7 +108,7 @@ public class Game2048 extends AppCompatActivity {
             }
 
             public void onSwipeRight() {
-                if (fingerliftoff) {
+                if (fingerliftoff && !moved) {
                     fingerliftoff = false;
 
                     for (int i = 0; i < 4; i++) {
@@ -108,7 +121,7 @@ public class Game2048 extends AppCompatActivity {
             }
 
             public void onSwipeLeft() {
-                if (fingerliftoff) {
+                if (fingerliftoff && !moved) {
                     fingerliftoff = false;
 
                     for (int i = 0; i < 4; i++) {
@@ -122,7 +135,7 @@ public class Game2048 extends AppCompatActivity {
             //For swiping up/down first rotate clockwise, slide tiles over and rotate counterclockwise
 
             public void onSwipeUp() {
-                if (fingerliftoff) {
+                if (fingerliftoff && !moved) {
                     fingerliftoff = false;
 
                     //Rotate matrices
@@ -141,7 +154,7 @@ public class Game2048 extends AppCompatActivity {
             }
 
             public void onSwipeDown() {
-                if (fingerliftoff) {
+                if (fingerliftoff && !moved) {
                     fingerliftoff = false;
 
                     gameboard = gameFunctions.rotateArray(gameboard, RotationDirection.CLOCKWISE);
@@ -164,6 +177,7 @@ public class Game2048 extends AppCompatActivity {
 
     }
 
+
     public void update() {
 
         boolean won = false;
@@ -172,37 +186,76 @@ public class Game2048 extends AppCompatActivity {
         for (int i = 0; i < gameboard[0].length; i++) {
             for (int j = 0; j < gameboard[1].length; j++) {
                 if (gameboard[i][j] != null) {
-                    gameboard[i][j].setPosition(coordinates[i][j]);
-                    gameboard[i][j].setSpot(new Point(i, j));
+                    gameboard[i][j].animate().
+                            translationX(coordinates[i][j].x).
+                            translationY(coordinates[i][j].y).
+                            setDuration(200).
+                            setListener(new Animator.AnimatorListener() {
+                        @Override
+                        public void onAnimationStart(Animator animation) {
+
+                        }
+
+                        @Override
+                        public void onAnimationEnd(Animator animation) {
+                            animfinished = true;
+                        }
+
+                        @Override
+                        public void onAnimationCancel(Animator animation) {
+                            animfinished = true;
+                        }
+
+                        @Override
+                        public void onAnimationRepeat(Animator animation) {
+
+                        }
+                    }).start();
+
                     gameboard[i][j].setColor(gameboard[i][j].getNumber());
 
-                    if(gameboard[i][j].getSpot() != new Point(i,j)){
+                    if(!gameboard[i][j].getSpot().equals(new Point(i,j))){
                         moved = true;
                     }
 
                     if (gameboard[i][j].getNumber() == 2048) {
                         won = true;
                     }
+
+                    gameboard[i][j].setSpot(new Point(i, j));
                 }
             }
         }
-
-        if (moved) {
-            moved = false;
             scoretext.setText(score + "");
             highscoretext.setText(highscore + "");
 
             ed.putInt("highscore", highscore);
             ed.commit();
 
-            createTile(grid, gameboard);
 
             if (won) {
                 filter.setVisibility(View.VISIBLE);
                 continuetext.setVisibility(View.VISIBLE);
                 gamestatetext.setText("You won!");
             }
-        }
+
+            timer.schedule(new TimerTask() {
+                @Override
+                public void run() {
+                    handler.post(new Runnable() {
+                        @Override
+                        public void run() {
+                            if (animfinished && moved) {
+                                createTile(grid, gameboard);
+                                animfinished = false;
+                                moved = false;
+                            }
+                        }
+                    });
+                }
+            }, 0, 20);
+
+
     }
 
 
@@ -216,7 +269,7 @@ public class Game2048 extends AppCompatActivity {
             PointF spotCoords = coordinates[spot.x][spot.y];
             optionbefore = spot;
 
-            float percentagetileX = 67.0f / 300.0f;
+            float percentagetileX = 144f / 656.6f;
             float percentagetileY = percentagetileX;
 
             Tile t = new Tile(this, spotCoords.x, spotCoords.y, ((int) (grid.getWidth() * percentagetileX)), ((int) (grid.getHeight() * percentagetileY)));
@@ -259,9 +312,9 @@ public class Game2048 extends AppCompatActivity {
 
         PointF[][] pointf = new PointF[4][4];
 
-        float percentageblockX = 65.0f / 300.0f;
+        float percentageblockX = 144f / 656.6f;
         float percentageblockY = percentageblockX;
-        float percantegespace = 8.0f / 300.0f;
+        float percantegespace = 16.12f / 656.6f;
 
         float blocksizeX = grid.getWidth() * percentageblockX;
         float blocksizeY = grid.getHeight() * percentageblockY;
@@ -298,7 +351,6 @@ public class Game2048 extends AppCompatActivity {
         return options;
     }
 
-
     public int randomNumber(int min, int max) {
         int range = (max - min) + 1;
         return ((int) (Math.random() * range) + min);
@@ -316,7 +368,6 @@ public class Game2048 extends AppCompatActivity {
     @Override
     public void onDestroy() {
         super.onDestroy();
-        gameboard = null;
     }
 
 }

@@ -5,24 +5,30 @@
     android:id="@+id/cl2048"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@drawable/bg2048"
-    tools:context=".Game2048" >
+    android:background="#FBF8EF"
+    tools:context=".Game2048">
 
     <ImageView
-        android:id="@+id/grid"
+        android:id="@+id/grid_background"
         android:layout_width="@dimen/_271sdp"
         android:layout_height="@dimen/_274sdp"
-        android:layout_marginStart="@dimen/_6sdp"
-        android:layout_marginTop="@dimen/_150sdp"
-        android:layout_marginEnd="@dimen/_6sdp"
-        android:layout_marginBottom="@dimen/_6sdp"
-        android:background="@drawable/grid"
-        android:visibility="visible"
-        app:layout_constraintBottom_toBottomOf="parent"
+        android:background="@drawable/grid_background"
+        app:layout_constraintBottom_toBottomOf="@id/grid_frame"
+        app:layout_constraintEnd_toEndOf="@id/grid_frame"
+        app:layout_constraintStart_toStartOf="@id/grid_frame"
+        app:layout_constraintTop_toTopOf="@id/grid_frame" />
+
+    <ImageView
+        android:id="@+id/grid_frame"
+        android:layout_width="@dimen/_271sdp"
+        android:layout_height="@dimen/_274sdp"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="180dp"
+        android:layout_marginEnd="8dp"
+        android:background="@drawable/grid_frame"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.008" />
+        app:layout_constraintTop_toTopOf="parent" />
 
     <TextView
         android:id="@+id/logo2048"
@@ -98,15 +104,14 @@
 
     <ImageView
         android:id="@+id/filter2048"
-        android:layout_width="@dimen/_271sdp"
+        android:layout_width="@dimen/_274sdp"
         android:layout_height="@dimen/_274sdp"
-        android:background="@drawable/filter"
         android:elevation="2dp"
         android:visibility="invisible"
-        app:layout_constraintBottom_toBottomOf="@+id/grid"
-        app:layout_constraintEnd_toEndOf="@+id/grid"
-        app:layout_constraintStart_toStartOf="@+id/grid"
-        app:layout_constraintTop_toTopOf="@+id/grid" />
+        app:layout_constraintBottom_toBottomOf="@+id/grid_frame"
+        app:layout_constraintEnd_toEndOf="@+id/grid_frame"
+        app:layout_constraintStart_toStartOf="@+id/grid_frame"
+        app:layout_constraintTop_toTopOf="@+id/grid_frame" />
 
     <TextView
         android:id="@+id/gamestate2048"
@@ -145,8 +150,8 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:background="#000000"
-        android:visibility="invisible"
         android:elevation="4dp"
+        android:visibility="invisible"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
