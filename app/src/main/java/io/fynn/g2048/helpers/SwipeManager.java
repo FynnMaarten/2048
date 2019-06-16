@@ -22,7 +22,7 @@ public class SwipeManager implements View.OnTouchListener {
 
                     //Calculates swipe direction
 
-                    if (Math.abs(newX - prevX) > Math.abs(newY - prevY) && Math.abs(newX - prevX) > 20) {
+                    if (Math.abs(newX - prevX) > Math.abs(newY - prevY) && Math.abs(newX - prevX) > 30) {
 
                         if (newX > prevX) {
                             onSwipeRight();
@@ -30,7 +30,7 @@ public class SwipeManager implements View.OnTouchListener {
                             onSwipeLeft();
                         }
                     }
-                    else if (Math.abs(newX - prevX) < Math.abs(newY - prevY) && Math.abs(newY - prevY) > 20) {
+                    else if (Math.abs(newX - prevX) < Math.abs(newY - prevY) && Math.abs(newY - prevY) > 30) {
 
                         if (newY > prevY) {
                             onSwipeDown();

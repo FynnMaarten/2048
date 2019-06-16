@@ -14,6 +14,8 @@ public class Tile extends android.support.v7.widget.AppCompatTextView {
 
     int number;
     Point spot = null;
+    boolean remove = false;
+    public boolean merge = false;
 
     Context context;
 
@@ -31,7 +33,12 @@ public class Tile extends android.support.v7.widget.AppCompatTextView {
 
         ConstraintLayout.LayoutParams params = new ConstraintLayout.LayoutParams(width, height);
         this.setLayoutParams(params);
+
+        this.setScaleX(0.8f);
+        this.setScaleY(0.8f);
     }
+
+
 
 
     //Sets the color (and number) of the tile

@@ -1,9 +1,5 @@
 package io.fynn.g2048;
 
-import android.animation.Animator;
-import android.animation.AnimatorSet;
-import android.animation.ObjectAnimator;
-import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Point;
 import android.graphics.PointF;
@@ -13,10 +9,7 @@ import android.support.constraint.ConstraintLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
-import android.view.animation.Animation;
-import android.view.animation.TranslateAnimation;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import java.util.ArrayList;
@@ -25,6 +18,7 @@ import java.util.TimerTask;
 
 import io.fynn.g2048.enums.RotationDirection;
 import io.fynn.g2048.enums.SwipeDirection;
+import io.fynn.g2048.helpers.AnimationRunnable;
 import io.fynn.g2048.helpers.SwipeManager;
 
 public class Game2048 extends AppCompatActivity {
@@ -35,7 +29,7 @@ public class Game2048 extends AppCompatActivity {
     View view;
 
     //Arrays
-    PointF[][] coordinates = new PointF[4][4];
+    public PointF[][] coordinates = new PointF[4][4];
 
     //Gameboard reflecting the game graphically(T)
     Tile[][] gameboard = new Tile[4][4];
@@ -43,9 +37,12 @@ public class Game2048 extends AppCompatActivity {
     //variables
     public static boolean moved = false;
     public static boolean fingerliftoff = true;
-    public static boolean animfinished = false;
     public static int score = 0;
     public static int highscore = 0;
+    public static int animationcount = 0;
+    public static boolean animfinished = true;
+    public static boolean updated = false;
+    public static int updatecount = 0;
     Point optionbefore;
 
     //Other important classes
@@ -56,10 +53,11 @@ public class Game2048 extends AppCompatActivity {
     SharedPreferences.Editor ed;
     Timer timer = new Timer();
     Handler handler = new Handler();
+    Object lock = new Object();
 
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    protected void onCreate(final Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_game2048);
 
@@ -86,6 +84,7 @@ public class Game2048 extends AppCompatActivity {
             public void run() {
                 coordinates = makeCoords(grid);
                 createTile(grid, gameboard);
+                createTile(grid, gameboard);
 
             }
         });
@@ -99,73 +98,164 @@ public class Game2048 extends AppCompatActivity {
                         continuetext.setVisibility(View.INVISIBLE);
                         view.setVisibility(View.VISIBLE);
 
-                        //Restart Game
-                        finish();
-                        Intent intent = new Intent(Game2048.this, Game2048.class);
-                        startActivity(intent);
+                        RestartGame(gameboard);
+
                     }
                 }
             }
 
-            public void onSwipeRight() {
-                if (fingerliftoff && !moved) {
+            public synchronized void onSwipeRight() {
+                if (fingerliftoff) {
                     fingerliftoff = false;
+                    if (updatecount < 2) {
+                        new Thread(new Runnable() {
+                            @Override
+                            public void run() {
+                                synchronized (lock) {
+                                    if (!updated) {
+                                        try {
+                                            lock.wait();
+                                        } catch (InterruptedException e) {
+                                            e.printStackTrace();
+                                        }
+                                    }
+                                    runOnUiThread(new Runnable() {
+                                        @Override
+                                        public void run() {
+                                            updated = false;
+                                            for (int i = 0; i < 4; i++) {
+                                                gameFunctions.slide(gameboard[i], SwipeDirection.SWIPE_RIGHT, coordinates);
+                                            }
 
-                    for (int i = 0; i < 4; i++) {
-                        gameFunctions.slide(gameboard[i], SwipeDirection.SWIPE_RIGHT);
+                                            update();
+                                        }
+                                    });
+
+                                }
+                            }
+                        }).start();
+                    }else{
+                        System.out.println("denied");
                     }
-
-
-                    update();
                 }
             }
 
-            public void onSwipeLeft() {
-                if (fingerliftoff && !moved) {
+            public synchronized void onSwipeLeft() {
+                if (fingerliftoff) {
                     fingerliftoff = false;
+                    if (updatecount <= 2) {
+                        new Thread(new Runnable() {
+                            @Override
+                            public void run() {
+                                synchronized (lock) {
+                                    if (!updated) {
+                                        try {
+                                            lock.wait();
+                                        } catch (InterruptedException e) {
+                                            e.printStackTrace();
+                                        }
+                                    }
+                                    runOnUiThread(new Runnable() {
+                                        @Override
+                                        public void run() {
+                                            updated = false;
+                                            for (int i = 0; i < 4; i++) {
+                                                gameFunctions.slide(gameboard[i], SwipeDirection.SWIPE_LEFT, coordinates);
+                                            }
 
-                    for (int i = 0; i < 4; i++) {
-                        gameFunctions.slide(gameboard[i], SwipeDirection.SWIPE_LEFT);
+                                            update();
+                                        }
+                                    });
+                                }
+                            }
+                        }).start();
+                    }else{
+                        System.out.println("denied");
                     }
-
-                    update();
                 }
             }
 
             //For swiping up/down first rotate clockwise, slide tiles over and rotate counterclockwise
 
-            public void onSwipeUp() {
-                if (fingerliftoff && !moved) {
+            public synchronized void onSwipeUp() {
+                if (fingerliftoff) {
                     fingerliftoff = false;
+                    if (updatecount <= 2) {
+                        new Thread(new Runnable() {
+                            @Override
+                            public void run() {
+                                synchronized (lock) {
+                                    if (!updated) {
+                                        try {
+                                            lock.wait();
+                                        } catch (InterruptedException e) {
+                                            e.printStackTrace();
+                                        }
+                                    }
+                                    runOnUiThread(new Runnable() {
+                                        @Override
+                                        public void run() {
+                                            updated = false;
+                                            //Rotate matrices
+                                            gameboard = gameFunctions.rotateArray(gameboard, RotationDirection.CLOCKWISE);
 
-                    //Rotate matrices
-                    gameboard = gameFunctions.rotateArray(gameboard, RotationDirection.CLOCKWISE);
+                                            for (int i = 0; i < 4; i++) {
+                                                gameFunctions.slide(gameboard[i], SwipeDirection.SWIPE_UP, coordinates);
+                                            }
 
-                    for (int i = 0; i < 4; i++) {
-                        gameFunctions.slide(gameboard[i], SwipeDirection.SWIPE_UP);
+                                            //Rotate them back
+                                            gameboard = gameFunctions.rotateArray(gameboard, RotationDirection.COUNTERCLOCKWISE);
+
+                                            update();
+                                        }
+                                    });
+                                }
+                            }
+                        }).start();
+                    }else{
+                        System.out.println("denied");
                     }
-
-                    //Rotate them back
-                    gameboard = gameFunctions.rotateArray(gameboard, RotationDirection.COUNTERCLOCKWISE);
-
-
-                    update();
                 }
             }
 
-            public void onSwipeDown() {
-                if (fingerliftoff && !moved) {
+            public synchronized void onSwipeDown() {
+                if (fingerliftoff) {
                     fingerliftoff = false;
+                    if (updatecount <= 2) {
+                        new Thread(new Runnable() {
+                            @Override
+                            public void run() {
+                                synchronized (lock) {
+                                    if (!updated) {
+                                        try {
+                                            lock.wait();
+                                        } catch (InterruptedException e) {
+                                            e.printStackTrace();
+                                        }
+                                    }
+                                    runOnUiThread(new Runnable() {
+                                        @Override
+                                        public void run() {
+                                            updated = false;
+                                            //Rotate matrices
+                                            gameboard = gameFunctions.rotateArray(gameboard, RotationDirection.CLOCKWISE);
 
-                    gameboard = gameFunctions.rotateArray(gameboard, RotationDirection.CLOCKWISE);
+                                            for (int i = 0; i < 4; i++) {
+                                                gameFunctions.slide(gameboard[i], SwipeDirection.SWIPE_DOWN, coordinates);
+                                            }
 
-                    for (int i = 0; i < 4; i++) {
-                        gameFunctions.slide(gameboard[i], SwipeDirection.SWIPE_DOWN);
+                                            //Rotate them back
+                                            gameboard = gameFunctions.rotateArray(gameboard, RotationDirection.COUNTERCLOCKWISE);
+
+                                            update();
+                                        }
+                                    });
+                                }
+                            }
+                        }).start();
+                    }else{
+                        System.out.println("denied");
                     }
-
-                    gameboard = gameFunctions.rotateArray(gameboard, RotationDirection.COUNTERCLOCKWISE);
-
-                    update();
                 }
             }
 
@@ -178,43 +268,62 @@ public class Game2048 extends AppCompatActivity {
     }
 
 
-    public void update() {
+    public synchronized void update() {
 
         boolean won = false;
+        animfinished = false;
+        updated = false;
+        updatecount += 1;
+        System.out.println("updatecount :" + updatecount);
 
         //Set UI components to match Array reflections
         for (int i = 0; i < gameboard[0].length; i++) {
             for (int j = 0; j < gameboard[1].length; j++) {
                 if (gameboard[i][j] != null) {
-                    gameboard[i][j].animate().
-                            translationX(coordinates[i][j].x).
-                            translationY(coordinates[i][j].y).
-                            setDuration(200).
-                            setListener(new Animator.AnimatorListener() {
-                        @Override
-                        public void onAnimationStart(Animator animation) {
+                    Point spot = new Point(i, j);
+                    if (!gameboard[i][j].getSpot().equals(spot) || moved) {
+                        animationcount += 1;
+                        gameboard[i][j].animate().
+                                translationX(coordinates[i][j].x).
+                                translationY(coordinates[i][j].y).
+                                setDuration(spot != gameboard[i][j].getSpot() ? 75 : 0).
+                                withEndAction(new AnimationRunnable(gameboard[i][j]) {
+                                    @Override
+                                    public void run() {
+                                        if (tile.merge) {
+                                            tile.merge = false;
+                                            tile.animate().
+                                                    scaleX(1.05f).
+                                                    scaleY(1.05f).
+                                                    setDuration(35).
+                                                    withEndAction(new AnimationRunnable(tile) {
+                                                        @Override
+                                                        public void run() {
+                                                            tile.setColor(tile.getNumber());
+                                                            tile.animate().
+                                                                    scaleX(1).
+                                                                    scaleY(1).
+                                                                    setDuration(35).
+                                                                    withEndAction(new Runnable() {
+                                                                        @Override
+                                                                        public void run() {
+                                                                            animationcount -= 1;
+                                                                            if (animationcount == 0) {
+                                                                                animfinished = true;
+                                                                            }
+                                                                        }
+                                                                    });
+                                                        }
+                                                    });
+                                        } else {
+                                            animationcount -= 1;
+                                            if (animationcount == 0) {
+                                                animfinished = true;
+                                            }
+                                        }
+                                    }
+                                });
 
-                        }
-
-                        @Override
-                        public void onAnimationEnd(Animator animation) {
-                            animfinished = true;
-                        }
-
-                        @Override
-                        public void onAnimationCancel(Animator animation) {
-                            animfinished = true;
-                        }
-
-                        @Override
-                        public void onAnimationRepeat(Animator animation) {
-
-                        }
-                    }).start();
-
-                    gameboard[i][j].setColor(gameboard[i][j].getNumber());
-
-                    if(!gameboard[i][j].getSpot().equals(new Point(i,j))){
                         moved = true;
                     }
 
@@ -226,40 +335,51 @@ public class Game2048 extends AppCompatActivity {
                 }
             }
         }
-            scoretext.setText(score + "");
-            highscoretext.setText(highscore + "");
-
-            ed.putInt("highscore", highscore);
-            ed.commit();
+        if (animationcount == 0) {
+            animfinished = true;
+        }
 
 
-            if (won) {
-                filter.setVisibility(View.VISIBLE);
-                continuetext.setVisibility(View.VISIBLE);
-                gamestatetext.setText("You won!");
-            }
+        scoretext.setText(score + "");
+        highscoretext.setText(highscore + "");
 
-            timer.schedule(new TimerTask() {
-                @Override
-                public void run() {
-                    handler.post(new Runnable() {
-                        @Override
-                        public void run() {
+        ed.putInt("highscore", highscore);
+        ed.commit();
+
+
+        if (won) {
+            filter.setVisibility(View.VISIBLE);
+            continuetext.setVisibility(View.VISIBLE);
+            gamestatetext.setText("You won!");
+        }
+
+        timer.schedule(new TimerTask() {
+            @Override
+            public void run() {
+                handler.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        synchronized (lock) {
                             if (animfinished && moved) {
                                 createTile(grid, gameboard);
                                 animfinished = false;
-                                moved = false;
+                                updatecount -= 1;
+                            } else if (animfinished && !updated) {
+                                updated = true;
+                                updatecount -= 1;
+                                animfinished = false;
+                                lock.notify();
                             }
                         }
-                    });
-                }
-            }, 0, 20);
-
+                    }
+                });
+            }
+        }, 0, 20);
 
     }
 
 
-    public void createTile(ImageView grid, Tile[][] gameboard) {
+    public synchronized void createTile(ImageView grid, Tile[][] gameboard) {
 
         ArrayList<Point> options = getOptions();
 
@@ -276,6 +396,16 @@ public class Game2048 extends AppCompatActivity {
             t.setSpot(spot);
             layout.addView(t);
 
+            t.animate().scaleX(1f).scaleY(1f).setDuration(50).withEndAction(new Runnable() {
+                @Override
+                public void run() {
+                    synchronized (lock) {
+                        moved = false;
+                        updated = true;
+                        lock.notify();
+                    }
+                }
+            });
             gameboard[spot.x][spot.y] = t;
 
             if (isGameOver()) {
@@ -288,6 +418,30 @@ public class Game2048 extends AppCompatActivity {
 
     public static void removeTile(Tile tile) {
         layout.removeView(tile);
+    }
+
+    public void RestartGame(Tile[][] gameboard) {
+        for (int i = 0; i < gameboard.length; i++) {
+            for (int j = 0; j < gameboard[0].length; j++) {
+                layout.removeView(gameboard[i][j]);
+                gameboard[i][j] = null;
+            }
+        }
+
+        score = 0;
+        scoretext.setText(score + "");
+
+        fingerliftoff = true;
+        moved = false;
+        animationcount = 0;
+        animfinished = false;
+        updated = false;
+
+        optionbefore = null;
+
+        view.setVisibility(View.INVISIBLE);
+        createTile(grid, gameboard);
+
     }
 
     public boolean isGameOver() {
