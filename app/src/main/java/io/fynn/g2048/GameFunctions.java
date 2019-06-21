@@ -8,10 +8,13 @@ import java.util.Collections;
 
 import io.fynn.g2048.enums.RotationDirection;
 import io.fynn.g2048.enums.SwipeDirection;
+import io.fynn.g2048.helpers.AnimationListener;
 import io.fynn.g2048.helpers.AnimationRunnable;
 
 public class GameFunctions {
     //Basic functions of 2048
+
+    public static ArrayList<Tile> listremove = new ArrayList<>();
 
     public Tile[] slide(Tile[] arr, SwipeDirection direction, PointF[][] coordinates) {
         ArrayList<Tile> arrlist = new ArrayList<>(arr.length);
@@ -31,12 +34,14 @@ public class GameFunctions {
                     arrlist.get(i).setNumber(number);
                     arrlist.get(i).merge = true;
 
-                    Point p = direction.equals(SwipeDirection.SWIPE_LEFT) ? new Point(arrlist.get(i + 1).getSpot().x,i) : new Point(3 - i ,arrlist.get(i + 1).getSpot().y);
+                    Point p = direction.equals(SwipeDirection.SWIPE_LEFT) ? new Point(arrlist.get(i + 1).getSpot().x, i) : new Point(3 - i, arrlist.get(i + 1).getSpot().y);
 
+                    arrlist.get(i + 1).remove = true;
+                    listremove.add(arrlist.get(i + 1));
                     arrlist.get(i + 1).animate().
                             translationX(coordinates[p.x][p.y].x).
                             translationY(coordinates[p.x][p.y].y).
-                            setDuration(!arrlist.get(i + 1).getSpot().equals(p) ? 75 : 0).
+                            setDuration(!arrlist.get(i + 1).getSpot().equals(p) ? 250 : 0).
                             withEndAction(new AnimationRunnable(arrlist.get(i + 1)) {
                                 @Override
                                 public void run() {
@@ -51,25 +56,23 @@ public class GameFunctions {
                     Game2048.highscore = (Game2048.score > Game2048.highscore) ? Game2048.score : Game2048.highscore;
                 }
             }
-        }
-        else if(direction.equals(SwipeDirection.SWIPE_RIGHT) || direction.equals(SwipeDirection.SWIPE_UP)){
-            for(int i = arrlist.size() - 1; i >= 1; i--){
-                if(arrlist.get(i).getNumber() == arrlist.get(i - 1).getNumber()){
+        } else if (direction.equals(SwipeDirection.SWIPE_RIGHT) || direction.equals(SwipeDirection.SWIPE_UP)) {
+            for (int i = arrlist.size() - 1; i >= 1; i--) {
+                if (arrlist.get(i).getNumber() == arrlist.get(i - 1).getNumber()) {
 
                     int number = arrlist.get(i).getNumber() * 2 + 1;
 
                     arrlist.get(i).setNumber(number);
                     arrlist.get(i).merge = true;
 
-                    Point p = direction.equals(SwipeDirection.SWIPE_RIGHT) ? new Point(arrlist.get(i - 1).getSpot().x,3 - (arrlist.size() - i - 1)) : new Point(arrlist.size() - i - 1,arrlist.get(i - 1).getSpot().y);
+                    Point p = direction.equals(SwipeDirection.SWIPE_RIGHT) ? new Point(arrlist.get(i - 1).getSpot().x, 3 - (arrlist.size() - i - 1)) : new Point(arrlist.size() - i - 1, arrlist.get(i - 1).getSpot().y);
 
-                    System.out.println(p);
-                    System.out.println(i);
-
+                    arrlist.get(i - 1).remove = true;
+                    listremove.add(arrlist.get(i - 1));
                     arrlist.get(i - 1).animate().
                             translationX(coordinates[p.x][p.y].x).
                             translationY(coordinates[p.x][p.y].y).
-                            setDuration(!arrlist.get(i - 1).getSpot().equals(p) ? 75 : 0).
+                            setDuration(!arrlist.get(i - 1).getSpot().equals(p) ? 250 : 0).
                             withEndAction(new AnimationRunnable(arrlist.get(i - 1)) {
                                 @Override
                                 public void run() {
@@ -86,8 +89,8 @@ public class GameFunctions {
             }
         }
 
-        for(int i = 0; i < arrlist.size(); i++){
-            if(arrlist.get(i).getNumber() / 2f != Math.floor(arrlist.get(i).getNumber() / 2f)){
+        for (int i = 0; i < arrlist.size(); i++) {
+            if (arrlist.get(i).getNumber() / 2f != Math.floor(arrlist.get(i).getNumber() / 2f)) {
                 arrlist.get(i).setNumber(arrlist.get(i).getNumber() - 1);
             }
         }
@@ -97,7 +100,7 @@ public class GameFunctions {
         //makes an list with the size of missing,filled with zeros
         ArrayList<Tile> zeros = new ArrayList<>(Collections.nCopies(missing, (Tile) null));
 
-        if(zeros.size() > 0) {
+        if (zeros.size() > 0) {
             if (direction.equals(SwipeDirection.SWIPE_LEFT) || direction.equals(SwipeDirection.SWIPE_DOWN)) {
                 //Add zeros at the end of the list
                 arrlist.addAll(zeros);

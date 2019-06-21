@@ -9,8 +9,6 @@ import io.fynn.g2048.Tile;
 
 public class AnimationRunnable implements Runnable {
 
-    public int i = 0;
-    public int j = 0;
     public Tile tile;
 
     public AnimationRunnable(Tile tile){
